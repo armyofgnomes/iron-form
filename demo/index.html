@@ -25,19 +25,85 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <link rel="import" href="../../paper-menu/paper-menu.html">
   <link rel="import" href="../../paper-item/paper-item.html">
   <link rel="import" href="../iron-form.html">
+  <link rel="import" href="../iron-form-element.html">
+
   <link rel="import" href="simple-element.html">
 </head>
 <style>
   .wide {
     width: 474px;
   }
+  iron-form-element {
+    background: white;
+    border: 1px solid grey;
+  }
 </style>
 <body>
   <div class="horizontal-section-container">
     <div>
+      <h1>No redirect</h1>
+      <iron-form-element method="get" action="http://localhost:3000/foo">
+        <input type="text" name="firstname" value="Mickey">
+        <input type="text" name="lastname" value="Mouse">
+        <br>
+        <input type="checkbox" name="donuts" checked> I like donuts<br>
+        <paper-checkbox name="food" value="pizza" checked>pizza</paper-checkbox>
+        <paper-checkbox name="food" value="cheese">cheese</paper-checkbox>
+        <br><br>
+        <input type="submit" value="Submit">
+        <input type="reset" value="Reset">
+      </iron-form-element>
+
+      <h1>Yes redirect</h1>
+      <iron-form-element method="get" action="http://localhost:3000/foo" allow-redirect>
+        <input type="text" name="firstname" value="Mickey">
+        <input type="text" name="lastname" value="Mouse">
+        <br>
+        <input type="checkbox" name="donuts" checked> I like donuts<br>
+        <paper-checkbox name="food" value="pizza" checked>foo</paper-checkbox>
+        <br><br>
+        <input type="submit" value="Submit">
+      </iron-form-element>
+
+      <h1>no validate</h1>
+      <iron-form-element method="get" action="/" novalidate>
+        <input name="name" label="Name" required></paper-input>
+        <paper-checkbox name="cheese" required>Cheese</paper-checkbox>
+        <br>
+        <input type="submit" value="Submit">
+      </iron-form-element>
+
+      <h4> complicated form </h4>
+      <iron-form-element iron-form-element method="get" action="/">
+        <p>
+          <input name="name" label="Name" required></paper-input>
+          <paper-checkbox name="cheese" required>Cheese</paper-checkbox>
+        </p>
+
+        <input type="submit" value="Submit">
+        <!--
+        <paper-button raised
+            onclick="submitHandler(event)">Submit</paper-button>
+        <paper-button raised
+            onclick="resetHandler(event)">Reset</paper-button> -->
+      </iron-form-element>
+
+      <h4> send a file </h4>
+      <iron-form-element action="http://localhost:3000/foo" method="post" enctype="multipart/form-data">
+        <input type="file" name="fileToUpload" id="fileToUpload">
+        <input type="submit" value="Submit">
+      </iron-form-element>
+
+
+      <!--
+      <h4>iron-form-element get</h4>
+      <div class="horizontal-section">
+
+      </div>
+
       <h4>method="get"</h4>
       <div class="horizontal-section">
-        <form is="iron-form" id="formGet" method="get" action="/">
+        <form id="formGet" method="get" action="/">
           <paper-input name="name" label="Name" required></paper-input>
           <paper-input name="animal" label="Favourite animal" required></paper-input>
           <br>
@@ -116,7 +182,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               onclick="submitHandler(event)">Submit</paper-button>
           <button type="submit">Native Submit</button>
           <button type="reset">Native Reset</button>
-        </form>
+        </form> -->
       </div>
     </div>
   </div>
@@ -131,8 +197,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </div>
 
   <script>
-    document.getElementById('formGet').addEventListener('iron-form-submit', display);
-    document.getElementById('formPost').addEventListener('iron-form-submit', display);
+    //document.getElementById('formGet').addEventListener('iron-form-submit', display);
+    //document.getElementById('formPost').addEventListener('iron-form-submit', display);
+    //document.getElementById('formGet2').addEventListener('iron-form-submit', display);
+
 
     function display(event) {
       var output = document.getElementById('output');
@@ -140,10 +208,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     function submitHandler(event) {
-      Polymer.dom(event).localTarget.parentElement.submit();
+      debugger
+      Polymer.dom(event).localTarget.parentElement.parentElement.submit();
     }
     function resetHandler(event) {
-      Polymer.dom(event).localTarget.parentElement.reset();
+      Polymer.dom(event).localTarget.parentElement.parentElement.reset();
     }
   </script>
 </body>
