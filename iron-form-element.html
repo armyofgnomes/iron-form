@@ -126,7 +126,8 @@ event and do your own custom submission:
        * For more information on this attribute, see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form
        */
       method: {
-        type: String
+        type: String,
+        value: 'GET'
       },
 
       /*
@@ -215,7 +216,7 @@ event and do your own custom submission:
         this.$.helper.submit();
         this.fire('iron-form-submit');
       } else {
-        this._makeAjaxRequest();
+        this._makeAjaxRequest(json);
       }
     },
 
@@ -223,12 +224,10 @@ event and do your own custom submission:
     },
 
     _handleFormResponse: function (event) {
-      debugger
       this.fire('iron-form-response', event.detail);
     },
 
     _handleFormError: function (event) {
-      debugger
       this.fire('iron-form-error', event.detail);
     },
 
@@ -272,11 +271,7 @@ event and do your own custom submission:
         // An element is submittable if it is not disabled, and if it has a
         // 'name' attribute
         for (var el, j = 0; el = elements[j], j < elements.length; j++) {
-          if (el.disabled) {
-            continue;
-          }
-
-          if (el.name) {
+          if (!el.disabled && el.name) {
             submittable.push(el);
           }
         }
@@ -322,8 +317,13 @@ event and do your own custom submission:
       //    `value` is incorrect, and we must use the values of each of its
       //    `selectedOptions`
       // 4. <input> can have a whole bunch of behaviours, so it's handled separately.
+      // 5. Buttons are hard. The button that was clicked to submit the form
+      //    is the one who's name/value gets sent to the server.
       var tag = element.tagName.toLowerCase();
 
+      if (tag === 'button' || (tag === 'input' && (element.type === 'submit' || element.type === 'reset'))) {
+        return [];
+      }
       if (tag === 'select') {
         return this._serializeSelectValues(element);
       } else if (tag === 'input') {
@@ -349,16 +349,16 @@ event and do your own custom submission:
     _serializeInputValues: function(element) {
       // Most of the inputs use their 'value' attribute, with the exception
       // of radio buttons, checkboxes and file.
-      var values = [];
       var type = element.type.toLowerCase();
 
-      // Don't do anything for type="file"
-      if ((type === 'checkbox' || type === 'radio') && element.checked) {
-        values.push(element.value);
-      } else if (type !== "file"){
-        values.push(element.value);
+      // Don't do anything for unchecked checkboxes/radio buttons.
+      // Don't do anything for file, since that requires a different request.
+      if (((type === 'checkbox' || type === 'radio') && !element.checked) ||
+          type === 'file') {
+        return [];
       }
-      return values;
+
+      return [element.value];
     },
 
     _createHiddenElement: function(name, value) {
@@ -369,7 +369,7 @@ event and do your own custom submission:
       return input;
     },
 
-    _addSerializedElement(json, name, value) {
+    _addSerializedElement: function(json, name, value) {
       // If the name doesn't exist, add it. Otherwise, serialize it to
       // an array,
       if (!json[name]) {
